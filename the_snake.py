@@ -41,18 +41,19 @@ clock = pygame.time.Clock()
 
 # Тут опишите все классы игры.
 class GameObject:
-    """ Базовый класс. """
+    """Базовый класс."""
 
     def __init__(self):
         self.position = ((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2))
         self.body_color = None
 
     def draw(self):
+        """Абстрактный метод."""
         pass
 
 
 class Apple(GameObject):
-    """ Класс яблоко, унаследованный от базового класса. """
+    """Класс яблоко, унаследованный от базового класса."""
 
     def __init__(self):
         super().__init__()
@@ -62,21 +63,23 @@ class Apple(GameObject):
     def randomize_position(self):
         """
         Метод генерации случайного расположения яблока на игровом поле.
-        В прекоде ошибка. Секций 640/20 = 32, индексация начинается с нуля,
-        поэтому ячейка 32 выходит за пределы игрового поля, последняя должна быть 31
+        В прекоде ошибка. Секций 640/20 = 32,
+        индексация начинается с нуля,
+        поэтому ячейка 32 выходит за пределы игрового поля,
+        последняя должна быть 31
         """
         self.position = (randint(0, GRID_WIDTH - 1) * GRID_SIZE,
                          randint(0, GRID_HEIGHT - 1) * GRID_SIZE)
 
     def draw(self):
-        """ Метод прорисовки яблока на игровом поле. """
+        """Метод прорисовки яблока на игровом поле."""
         rect = pygame.Rect(self.position, (GRID_SIZE, GRID_SIZE))
         pygame.draw.rect(screen, self.body_color, rect)
         pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
 
 
 class Snake(GameObject):
-    """ Класс змея, унаследованный от базового класса. """
+    """Класс змея, унаследованный от базового класса."""
 
     def __init__(self):
         super().__init__()
@@ -88,7 +91,7 @@ class Snake(GameObject):
         self.lenght = 1
 
     def reset(self):
-        """ Метод сброса состояния змеи после проигрыша. """
+        """Метод сброса состояния змеи после проигрыша."""
         self.lenght = 1
         self.positions = [((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2))]
         self.direction = (
@@ -96,27 +99,32 @@ class Snake(GameObject):
             randint(0, GRID_HEIGHT) * GRID_SIZE
         )
         self.next_direction = None
-        screen.fill(BOARD_BACKGROUND_COLOR)
+        screen.fill(
+            BOARD_BACKGROUND_COLOR
+        )
 
     def get_head_position(self):
-        """ Метод возвращает позицию головы змеи (первый элемент списка positions). """
+        """Метод возвращает позицию головы змеи."""
         return self.positions[0]
 
     def move(self):
         """
         Метод обновляет позицию змейки (координаты каждой секции),
-        добавляя новую голову в начало списка positions и удаляя последний элемент,
+        добавляя новую голову в начало списка positions
+        и удаляя последний элемент,
         если длина змейки не увеличилась.
         """
         head_position = self.get_head_position()
         head_x_position, head_y_position = self.direction
-        new_head_position = ((head_position[0] + head_x_position * GRID_SIZE) % SCREEN_WIDTH,
-                             (head_position[1] + head_y_position * GRID_SIZE) % SCREEN_HEIGHT)
+        new_head_position = (
+            (head_position[0] + head_x_position * GRID_SIZE) % SCREEN_WIDTH,
+            (head_position[1] + head_y_position * GRID_SIZE) % SCREEN_HEIGHT
+        )
         self.positions.insert(0, new_head_position)
         self.last = self.positions.pop()
 
     def draw(self):
-        """ Метод прорисовки змеи на игровом поле. """
+        """Метод прорисовки змеи на игровом поле."""
         for position in self.positions[:-1]:
             rect = (pygame.Rect(position, (GRID_SIZE, GRID_SIZE)))
             pygame.draw.rect(screen, self.body_color, rect)
@@ -131,14 +139,14 @@ class Snake(GameObject):
             pygame.draw.rect(screen, BOARD_BACKGROUND_COLOR, last_rect)
 
     def update_direction(self):
-        """ Метод обновляет направление змеи. """
+        """Метод обновляет направление змеи."""
         if self.next_direction:
             self.direction = self.next_direction
             self.next_direction = None
 
 
 def handle_keys(game_object):
-    """ Функция обработки нажатия клавиш управления. """
+    """Функция обработки нажатия клавиш управления."""
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -155,7 +163,7 @@ def handle_keys(game_object):
 
 
 def main():
-    """ Основной игровой цикл. """
+    """Основной игровой цикл."""
     pygame.init()
     apple = Apple()
     snake = Snake()
@@ -172,7 +180,7 @@ def main():
         if snake.get_head_position() == apple.position:
             snake.positions.append(snake.last)
             apple.randomize_position()
-        # Если змея столкнулась с собой. Сброс состояния змеи и генерация нового расположения яблока.
+        # Если змея столкнулась с собой. Сброс состояния змеи и яблока.
         if snake.get_head_position() in snake.positions[1:]:
             snake.reset()
             apple.randomize_position()
