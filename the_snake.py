@@ -26,8 +26,10 @@ APPLE_COLOR = (255, 0, 0)
 # Цвет змейки
 SNAKE_COLOR = (0, 255, 0)
 
+STONE_COLOR = (0, 0, 255)
+
 # Скорость движения змейки:
-SPEED = 20
+SPEED = 15
 
 # Настройка игрового окна:
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
@@ -76,6 +78,14 @@ class Apple(GameObject):
         rect = pygame.Rect(self.position, (GRID_SIZE, GRID_SIZE))
         pygame.draw.rect(screen, self.body_color, rect)
         pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
+
+
+class Stone(Apple):
+    def __init__(self):
+        super().__init__()
+        self.body_color = STONE_COLOR
+        self.position = (randint(0, GRID_WIDTH - 1) * GRID_SIZE,
+                         randint(0, GRID_HEIGHT - 1) * GRID_SIZE)
 
 
 class Snake(GameObject):
@@ -167,6 +177,7 @@ def main():
     pygame.init()
     apple = Apple()
     snake = Snake()
+    stone = Stone()
 
     while True:
         clock.tick(SPEED)
@@ -178,10 +189,19 @@ def main():
         pygame.display.update()
         # Если змея укусила яблоко. Генерация нового расположения яблока.
         if snake.get_head_position() == apple.position:
+            snake.lenght += 1
             snake.positions.append(snake.last)
             apple.randomize_position()
+            stone.randomize_position()
+        # Если длина змеи кратна 5, то появляется один камень.
+        if snake.lenght % 5 == 0:
+            stone.draw()
         # Если змея столкнулась с собой. Сброс состояния змеи и яблока.
         if snake.get_head_position() in snake.positions[1:]:
+            snake.reset()
+            apple.randomize_position()
+        # Если голова змеи столкнулась с камнем - проигрыш.
+        if snake.get_head_position() == stone.position:
             snake.reset()
             apple.randomize_position()
 
