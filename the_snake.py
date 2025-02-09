@@ -81,6 +81,8 @@ class Apple(GameObject):
 
 
 class Stone(Apple):
+    """Класс камень, унаследованный от класса яблоко."""
+
     def __init__(self):
         super().__init__()
         self.body_color = STONE_COLOR
