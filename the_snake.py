@@ -1,4 +1,4 @@
-from random import randint
+from random import choice
 
 import pygame as pg
 
@@ -57,31 +57,6 @@ class GameObject:
         pg.draw.rect(screen, BORDER_COLOR, rect, 1)
 
 
-class Apple(GameObject):
-    """Класс яблоко, унаследованный от базового класса."""
-
-    def __init__(self):
-        super().__init__()
-        self.new_position = None
-        self.body_color = APPLE_COLOR
-        self.randomize_position()
-
-    def randomize_position(self):
-        """
-        Метод генерации случайного расположения яблока на игровом поле.
-        В прекоде ошибка. Секций 640/20 = 32,
-        индексация начинается с нуля,
-        поэтому ячейка 32 выходит за пределы игрового поля,
-        последняя должна быть 31
-        """
-        self.position = (randint(0, GRID_WIDTH - 1) * GRID_SIZE,
-                         randint(0, GRID_HEIGHT - 1) * GRID_SIZE)
-
-    def draw(self):
-        """Метод прорисовки яблока на игровом поле."""
-        GameObject.draw_rect(self.position, self.body_color)
-
-
 class Snake(GameObject):
     """Класс змея, унаследованный от базового класса."""
 
@@ -92,7 +67,7 @@ class Snake(GameObject):
 
     def reset(self):
         """Метод сброса состояния змеи после проигрыша."""
-        self.positions = [((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2))]
+        self.positions = [SCREEN_CENTER]
         self.next_direction = None
         self.direction = RIGHT
         self.lenght = 1
@@ -125,8 +100,8 @@ class Snake(GameObject):
     def draw(self):
         """Метод прорисовки змеи на игровом поле."""
         for position in self.positions[:-1]:
-            GameObject.draw_rect(position, self.body_color)
-        GameObject.draw_rect(self.get_head_position(), self.body_color)
+            self.draw_rect(position, self.body_color)
+        self.draw_rect(self.get_head_position(), self.body_color)
         if self.last:
             last_rect = pg.Rect(self.last, (GRID_SIZE, GRID_SIZE))
             pg.draw.rect(screen, BOARD_BACKGROUND_COLOR, last_rect)
@@ -136,6 +111,32 @@ class Snake(GameObject):
         if self.next_direction:
             self.direction = self.next_direction
             self.next_direction = None
+
+
+class Apple(GameObject):
+    """Класс яблоко, унаследованный от базового класса."""
+
+    def __init__(self, snake_positions=None):
+        super().__init__()
+        if snake_positions is None:
+            snake_positions = [SCREEN_CENTER]
+        self.new_position = None
+        self.body_color = APPLE_COLOR
+        self.randomize_position(snake_positions)
+
+    def randomize_position(self, snake_positions):
+        """Метод генерации случайного расположения яблока на игровом поле."""
+        width = choice(range(0, SCREEN_WIDTH, 20))
+        height = choice(range(0, SCREEN_HEIGHT, 20))
+        if (width, height) in snake_positions:
+            while (width, height) in snake_positions:
+                width = choice(range(0, SCREEN_WIDTH, 20))
+                height = choice(range(0, SCREEN_HEIGHT, 20))
+        self.position = (width, height)
+
+    def draw(self):
+        """Метод прорисовки яблока на игровом поле."""
+        self.draw_rect(self.position, self.body_color)
 
 
 def handle_keys(game_object):
@@ -158,8 +159,8 @@ def handle_keys(game_object):
 def main():
     """Основной игровой цикл."""
     pg.init()
-    apple = Apple()
     snake = Snake()
+    apple = Apple(snake.positions)
 
     while True:
         clock.tick(SPEED)
@@ -179,12 +180,11 @@ def main():
         # Если змея укусила яблоко. Генерация нового расположения яблока.
         if snake.get_head_position() == apple.position:
             snake.lenght += 1
-            while apple.position in snake.positions:
-                apple.randomize_position()
+            apple.randomize_position(snake.positions)
         # Если змея столкнулась с собой. Сброс состояния змеи и яблока.
-        if snake.get_head_position() in snake.positions[4:]:
+        elif snake.get_head_position() in snake.positions[4:]:
             snake.reset()
-            apple.randomize_position()
+            apple.randomize_position(snake.positions)
 
 
 if __name__ == '__main__':
