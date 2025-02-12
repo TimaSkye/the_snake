@@ -28,7 +28,7 @@ APPLE_COLOR = (255, 0, 0)
 SNAKE_COLOR = (0, 255, 0)
 
 # Скорость движения змейки:
-SPEED = 15
+SPEED = 20
 
 # Настройка игрового окна:
 screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
@@ -118,21 +118,16 @@ class Apple(GameObject):
 
     def __init__(self, snake_positions=None):
         super().__init__()
-        if snake_positions is None:
-            snake_positions = [SCREEN_CENTER]
-        self.new_position = None
         self.body_color = APPLE_COLOR
-        self.randomize_position(snake_positions)
+        self.randomize_position(snake_positions or [SCREEN_CENTER])
 
     def randomize_position(self, snake_positions):
         """Метод генерации случайного расположения яблока на игровом поле."""
-        width = choice(range(0, SCREEN_WIDTH, 20))
-        height = choice(range(0, SCREEN_HEIGHT, 20))
-        if (width, height) in snake_positions:
-            while (width, height) in snake_positions:
-                width = choice(range(0, SCREEN_WIDTH, 20))
-                height = choice(range(0, SCREEN_HEIGHT, 20))
-        self.position = (width, height)
+        while True:
+            position = (choice(range(0, SCREEN_WIDTH, 20)), choice(range(0, SCREEN_HEIGHT, 20)))
+            if position not in snake_positions:
+                break
+        self.position = position
 
     def draw(self):
         """Метод прорисовки яблока на игровом поле."""
