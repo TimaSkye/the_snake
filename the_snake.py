@@ -124,7 +124,10 @@ class Apple(GameObject):
     def randomize_position(self, snake_positions):
         """Метод генерации случайного расположения яблока на игровом поле."""
         while True:
-            position = (choice(range(0, SCREEN_WIDTH, 20)), choice(range(0, SCREEN_HEIGHT, 20)))
+            position = (
+                choice(range(0, SCREEN_WIDTH, 20)),
+                choice(range(0, SCREEN_HEIGHT, 20))
+            )
             if position not in snake_positions:
                 break
         self.position = position
